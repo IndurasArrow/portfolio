@@ -52,16 +52,16 @@ export default function Home() {
               </Button>
             </div>
             <div className=" h-full flex flex-col items-center justify-center gap-2 w-full">
-              <div className=" flex flex-col items-center justify-center">
+              <div className=" flex bg-background flex-col items-center justify-center">
                 <UpdateIcon className="w-6 h-6  animate-spin" />
-                <span className=" text-sm font-light  text-zinc-400 dark:text-zinc-400">
+                <span className=" text-sm font-light bg-background  text-zinc-400 dark:text-zinc-400">
                   {" "}
                   Loading
                 </span>
               </div>
             </div>
             <iframe
-              className=" absolute w-full z-10  h-[calc(100vh-9rem)] mt-12 "
+              className="  bg-background absolute w-full z-10  h-[calc(100vh-9rem)] mt-12 "
               src={link}
             ></iframe>
           </div>
@@ -96,14 +96,14 @@ export default function Home() {
                     setTitle(card.title);
                     document.body.style.overflow = "hidden";
                   }}
-                  className="md:p-6 p-2 shadow-none"
+                  className="md:p-6 p-2 shadow-none cursor-pointer "
                   key={index}
                 >
                   <Card className="p-1 shadow-none rounded-2xl">
                     <div className=" w-full  h-full aspect-video relative">
                       <Image
                         className="rounded-xl"
-                        src={card.image}
+                        src={`${card.image}`}
                         alt={card.title}
                         fill
                       />
