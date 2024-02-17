@@ -157,7 +157,7 @@ export default function Home() {
         <h2 className="text-5xl font-light tracking-tight ">Contact</h2>
         <br />
         <br />
-        <p>Email : maewal.divyansh@gmai.com</p>
+        <p>Email : maewal.divyansh@gmail.com</p>
         <br />
         <br />
       </section>
