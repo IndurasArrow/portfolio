@@ -1,5 +1,10 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
+import Particles, { initParticlesEngine } from "@tsparticles/react";
+// import { loadAll } from "@/tsparticles/all"; // if you are going to use `loadAll`, install the "@tsparticles/all" package too.
+// import { loadFull } from "tsparticles"; // if you are going to use `loadFull`, install the "tsparticles" package too.
+import { loadSlim } from "@tsparticles/slim"; // if you are going to use `loadSlim`, install the "@tsparticles/slim" package too.
+// import { loadBasic } from "@tsparticles/basic"; // if you are going to use `loadBasic`, install the "@tsparticles/basic" package too.
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { UpdateIcon } from "@radix-ui/react-icons";
@@ -31,6 +36,26 @@ export default function Home() {
       link: "https://drive.google.com/file/d/1C-2xUfjGuFXUt9l7YzQbnQX0Z9uWO5lC/preview",
     },
   ];
+
+  const [init, setInit] = useState(false);
+
+  const particlesLoaded = (container) => {
+    console.log(container);
+  };
+
+  useEffect(() => {
+    initParticlesEngine(async (engine) => {
+      // you can initiate the tsParticles instance (engine) here, adding custom shapes or presets
+      // this loads the tsparticles package bundle, it's the easiest method for getting everything ready
+      // starting from v2 you can add only the features you need reducing the bundle size
+      //await loadAll(engine);
+      //await loadFull(engine);
+      await loadSlim(engine);
+      //await loadBasic(engine);
+    }).then(() => {
+      setInit(true);
+    });
+  }, []);
 
   return (
     <main className=" w-full flex flex-col  items-center  mt-20 ">
@@ -131,17 +156,10 @@ export default function Home() {
         <br />
         <br />
         <p>
-          Hi, I am Divyansh Maewal, a UX/UI designer with a passion for creating
-          beautiful and functional designs. I have a strong foundation in
-          graphic design and a keen eye for detail. I am a creative thinker who
-          enjoys solving complex problems and creating intuitive user
-          experiences. I am always looking for new challenges and opportunities
-          to learn and grow as a designer. I am passionate about creating
-          designs that are not only visually appealing but also user-friendly
-          and accessible to everyone. I am excited about the future of design
-          and the impact it can have on the world. I am always looking for new
-          opportunities to collaborate with other designers and developers to
-          create innovative and impactful designs.
+          I am a UX designer currently studying cyberlaw. I enjoy puzzles and
+          challenges, work well in teams to brainstorm new ideas, along with the
+          process of User Research for finding solutions to problems through
+          design and thrive under pressure.
         </p>
         <br />
         <br />
@@ -161,6 +179,83 @@ export default function Home() {
         <br />
         <br />
       </section>
+      <div className=" absolute -z-10 top-0">
+        {init && (
+          <Particles
+            id="tsparticles"
+            particlesLoaded={particlesLoaded}
+            options={{
+              background: {
+                color: {
+                  value: "#000000",
+                },
+              },
+              fpsLimit: 120,
+              interactivity: {
+                events: {
+                  onClick: {
+                    enable: true,
+                    mode: "push",
+                  },
+                  onHover: {
+                    enable: true,
+                    mode: "repulse",
+                  },
+                  resize: true,
+                },
+                modes: {
+                  push: {
+                    quantity: 4,
+                  },
+                  repulse: {
+                    distance: 200,
+                    duration: 0.4,
+                  },
+                },
+              },
+              particles: {
+                color: {
+                  value: "#ffffff",
+                },
+                links: {
+                  color: "#ffffff",
+                  distance: 150,
+                  enable: false,
+                  opacity: 0.5,
+                  width: 1,
+                },
+                move: {
+                  direction: "none",
+                  enable: true,
+                  outModes: {
+                    default: "bounce",
+                  },
+                  random: false,
+                  speed: 2,
+                  straight: false,
+                },
+                number: {
+                  density: {
+                    enable: true,
+                    area: 800,
+                  },
+                  value: 100,
+                },
+                opacity: {
+                  value: 0.5,
+                },
+                shape: {
+                  type: "circle",
+                },
+                size: {
+                  value: { min: 1, max: 3 },
+                },
+              },
+              detectRetina: true,
+            }}
+          />
+        )}
+      </div>
     </main>
   );
 }

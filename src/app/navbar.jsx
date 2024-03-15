@@ -24,7 +24,6 @@ export default function Navbar() {
 
   return (
     <div className=" w-full z-50 fixed flex justify-center  top-4">
-      <div className=" fixed top-0 z-10 bg-background h-12 w-full"></div>
       <Card className="flex z-20 relative  max-h-12 p-6 max-w-screen-2xl  items-center justify-between   w-11/12 ">
         <div onClick={scrollToTop}>
           <div className=" text-sm cursor-pointer">
