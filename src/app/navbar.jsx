@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export default function Navbar() {
+export default function Navbar(props) {
   const isBrowser = () => typeof window !== "undefined"; //The approach recommended by Next.js
 
   function scrollToTop() {
@@ -52,14 +52,19 @@ export default function Navbar() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setTheme("light")}>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setTheme("light");
+                  }}
+                >
                   Light
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme("dark")}>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setTheme("dark");
+                  }}
+                >
                   Dark
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme("system")}>
-                  System
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

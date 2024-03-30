@@ -7,13 +7,17 @@ import { loadSlim } from "@tsparticles/slim"; // if you are going to use `loadSl
 // import { loadBasic } from "@tsparticles/basic"; // if you are going to use `loadBasic`, install the "@tsparticles/basic" package too.
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useTheme } from "next-themes";
 import { UpdateIcon } from "@radix-ui/react-icons";
 import Image from "next/image";
 
 export default function Home() {
+  const { theme, setTheme } = useTheme();
+
   const [open, setOpen] = useState(false);
   const [link, setLink] = useState("");
   const [title, setTitle] = useState("");
+
   const CardList = [
     {
       title: "Plant Care",
@@ -187,7 +191,7 @@ export default function Home() {
             options={{
               background: {
                 color: {
-                  value: "#000000",
+                  value: `${theme === "dark" ? "#000" : "#fff"}`,
                 },
               },
               fpsLimit: 120,
@@ -215,7 +219,7 @@ export default function Home() {
               },
               particles: {
                 color: {
-                  value: "#ffffff",
+                  value: `${theme === "dark" ? "#fff" : "#000"}`,
                 },
                 links: {
                   color: "#ffffff",
