@@ -4,13 +4,19 @@
  * components only lay it out.
  */
 
-const productionUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
-  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-  : "https://portfolio-five-mauve-38.vercel.app";
+/**
+ * The address used for canonical links, the sitemap and social preview
+ * images. It has to be one that resolves, or link previews come up empty.
+ *
+ * The custom domain (www.divyanshmaewal.com) is down for now, so this falls
+ * back to the Vercel address. When the domain is back, set
+ * NEXT_PUBLIC_SITE_URL=https://www.divyanshmaewal.com in the Vercel project
+ * settings and redeploy; nothing here needs to change.
+ */
+const fallbackUrl = "https://portfolio-five-mauve-38.vercel.app";
 
 export const site = {
-  /** Set NEXT_PUBLIC_SITE_URL when a custom domain is attached. */
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? productionUrl,
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? fallbackUrl,
   name: "Divyansh Maewal",
   initials: "DM",
   role: "Lead AI Deployment Engineer",

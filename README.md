@@ -94,9 +94,13 @@ More shadcn/ui components can be added with `npx shadcn@latest add <name>`;
 
 ## Deployment
 
-Deployed on Vercel from `main`. If a custom domain is attached, set
-`NEXT_PUBLIC_SITE_URL` to it so canonical URLs, the sitemap and the social
-preview image point at the right origin.
+Deployed on Vercel from `main`; every push builds and goes live.
+
+Canonical links, the sitemap and the social preview image use
+`https://portfolio-five-mauve-38.vercel.app` unless `NEXT_PUBLIC_SITE_URL` is
+set. Once the custom domain is serving again, set
+`NEXT_PUBLIC_SITE_URL=https://www.divyanshmaewal.com` in the Vercel project's
+environment variables and redeploy.
 
 ## Licences
 
