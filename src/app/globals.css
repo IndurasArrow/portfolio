@@ -57,3 +57,610 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ==========================================================================
+   Additions on top of the original theme
+   ========================================================================== */
+
+:root {
+  /* 11vw on tablets and up; on phones it grows a little faster so the
+     longest word still fits the narrowest screens. */
+  --hero: clamp(2.75rem, max(11vw, min(14.5vw, 4.2rem)), 10.5rem);
+}
+
+html {
+  scroll-padding-top: 6.5rem;
+}
+
+@layer base {
+  ::selection {
+    background: hsl(var(--foreground));
+    color: hsl(var(--background));
+  }
+
+  :focus-visible {
+    outline: 1px solid hsl(var(--ring));
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* ---- Navbar ---------------------------------------------------------- */
+
+  .nav-progress {
+    position: absolute;
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: -1px;
+    height: 1px;
+    background: hsl(var(--foreground));
+    transform-origin: left center;
+    transform: scaleX(0);
+  }
+
+  @supports (animation-timeline: scroll()) {
+    .nav-progress {
+      animation: nav-progress linear both;
+      animation-timeline: scroll(root block);
+    }
+
+    @keyframes nav-progress {
+      to {
+        transform: scaleX(1);
+      }
+    }
+  }
+
+  /* ---- Hero ------------------------------------------------------------ */
+
+  .hero-line {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.14em;
+    margin-bottom: -0.14em;
+  }
+
+  .hero-line > span {
+    display: block;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-line > span {
+      animation: line-up 1.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-delay: var(--d, 0ms);
+    }
+
+    .fade-up {
+      animation: fade-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-delay: var(--d, 0ms);
+    }
+
+    @keyframes line-up {
+      from {
+        transform: translateY(105%);
+      }
+
+      to {
+        transform: none;
+      }
+    }
+
+    @keyframes fade-up {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    /* Scroll-linked reveal; browsers without scroll timelines just show it. */
+    @supports (animation-timeline: view()) {
+      .reveal {
+        animation: fade-up linear both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 30%;
+      }
+    }
+  }
+
+  /* ---- Glow cards: cursor-following light and border ------------------- */
+
+  .glow {
+    position: relative;
+    isolation: isolate;
+    transform: perspective(1100px) rotateX(var(--rx, 0deg))
+      rotateY(var(--ry, 0deg));
+    transition:
+      transform 0.25s ease-out,
+      border-color 0.3s ease;
+  }
+
+  .glow::before,
+  .glow::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+  }
+
+  .glow::before {
+    z-index: -1;
+    background: radial-gradient(
+      26rem circle at var(--mx, 50%) var(--my, 50%),
+      hsl(var(--foreground) / 0.07),
+      transparent 62%
+    );
+  }
+
+  .glow::after {
+    inset: -1px;
+    padding: 1px;
+    background: radial-gradient(
+      16rem circle at var(--mx, 50%) var(--my, 50%),
+      hsl(var(--foreground) / 0.55),
+      transparent 68%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+  }
+
+  .glow:hover::before,
+  .glow:hover::after,
+  .glow:focus-within::before,
+  .glow:focus-within::after {
+    opacity: 1;
+  }
+
+  /* ---- Project visuals -------------------------------------------------- */
+
+  .visual {
+    background-image: radial-gradient(
+      hsl(var(--foreground) / 0.09) 1px,
+      transparent 1px
+    );
+    background-size: 18px 18px;
+    background-position: center;
+  }
+
+  .v-ring,
+  .v-bar,
+  .v-pop {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .v-ring {
+      animation: v-ring 3.9s ease-out infinite;
+    }
+
+    .v-bar {
+      animation: v-bar 1s ease-in-out infinite alternate;
+    }
+
+    .v-dash {
+      animation: v-dash 1.4s linear infinite;
+    }
+
+    .v-blink {
+      animation: v-blink 2.4s ease-in-out infinite;
+    }
+
+    .v-scan {
+      animation: v-scan 3.6s ease-in-out infinite alternate;
+    }
+
+    .v-pop {
+      animation: v-pop 2.8s ease-in-out infinite;
+    }
+  }
+
+  .v-ring {
+    opacity: 0;
+  }
+
+  @keyframes v-ring {
+    0% {
+      transform: scale(0.08);
+      opacity: 0.75;
+    }
+
+    100% {
+      transform: scale(1);
+      opacity: 0;
+    }
+  }
+
+  @keyframes v-bar {
+    from {
+      transform: scaleY(0.3);
+    }
+
+    to {
+      transform: scaleY(1);
+    }
+  }
+
+  @keyframes v-dash {
+    to {
+      stroke-dashoffset: -18;
+    }
+  }
+
+  @keyframes v-blink {
+    0%,
+    100% {
+      opacity: 0.15;
+    }
+
+    50% {
+      opacity: 0.9;
+    }
+  }
+
+  @keyframes v-scan {
+    from {
+      transform: translateY(30px);
+    }
+
+    to {
+      transform: translateY(150px);
+    }
+  }
+
+  @keyframes v-pop {
+    0%,
+    100% {
+      transform: scale(0.8);
+    }
+
+    50% {
+      transform: scale(1.25);
+    }
+  }
+
+  /* ---- Viewer ----------------------------------------------------------- */
+
+  @media (prefers-reduced-motion: no-preference) {
+    .viewer {
+      animation: viewer-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes viewer-in {
+      from {
+        opacity: 0;
+        transform: translateY(24px);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+  }
+
+  /* ---- Marquee ---------------------------------------------------------- */
+
+  .marquee {
+    display: flex;
+    width: max-content;
+    animation: marquee 60s linear infinite;
+  }
+
+  .marquee-wrap:hover .marquee {
+    animation-play-state: paused;
+  }
+
+  .marquee-wrap {
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 12%,
+      #000 88%,
+      transparent
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 12%,
+      #000 88%,
+      transparent
+    );
+  }
+
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* ---- Workflow diagram ------------------------------------------------- */
+
+  .pipe {
+    --gap: 1.5rem;
+    --pad: 1.25rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--gap);
+    align-items: center;
+  }
+
+  .pipe-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--gap);
+  }
+
+  .pipe-loop {
+    position: relative;
+    padding: var(--pad);
+    border: 1px dashed hsl(var(--foreground) / 0.25);
+    border-radius: 1rem;
+  }
+
+  .pipe-loop-tag {
+    position: absolute;
+    left: 1rem;
+    padding-inline: 0.5rem;
+    background: hsl(var(--background));
+    font-size: 0.75rem;
+    color: hsl(var(--muted-foreground));
+    white-space: nowrap;
+  }
+
+  .pipe-loop-tag[data-pos="top"] {
+    top: 0;
+    transform: translateY(-50%);
+  }
+
+  .pipe-loop-tag[data-pos="bottom"] {
+    bottom: 0;
+    transform: translateY(50%);
+  }
+
+  .pipe-node {
+    position: relative;
+  }
+
+  .pipe-node[data-link]::before {
+    content: "";
+    position: absolute;
+    left: 1.75rem;
+    bottom: 100%;
+    width: 1px;
+    height: var(--arrow, var(--gap));
+    background: hsl(var(--foreground) / 0.3);
+  }
+
+  .pipe-node[data-link]::after {
+    content: "";
+    position: absolute;
+    left: 1.75rem;
+    bottom: calc(100% + 3px);
+    width: 6px;
+    height: 6px;
+    border-right: 1px solid hsl(var(--foreground) / 0.6);
+    border-bottom: 1px solid hsl(var(--foreground) / 0.6);
+    transform: translateX(-2.5px) rotate(45deg);
+  }
+
+  .pipe-node[data-link="long"] {
+    --arrow: calc(var(--gap) + var(--pad));
+  }
+
+  .pipe-light {
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background: hsl(var(--foreground) / 0.2);
+  }
+
+  @media (min-width: 640px) {
+    .pipe-loop .pipe-row {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .pipe-loop .pipe-node[data-link="short"]::before {
+      left: auto;
+      right: 100%;
+      bottom: auto;
+      top: 50%;
+      width: var(--gap);
+      height: 1px;
+    }
+
+    .pipe-loop .pipe-node[data-link="short"]::after {
+      left: auto;
+      right: calc(100% + 3px);
+      bottom: auto;
+      top: 50%;
+      transform: translateY(-50%) rotate(-45deg);
+    }
+  }
+
+  @media (min-width: 1152px) {
+    .pipe {
+      grid-template-columns:
+        minmax(0, 1fr) minmax(0, 1fr) minmax(0, 3.45fr) minmax(0, 1fr)
+        minmax(0, 1fr);
+    }
+
+    .pipe-node[data-link]::before {
+      left: auto;
+      right: 100%;
+      bottom: auto;
+      top: 50%;
+      width: var(--arrow, var(--gap));
+      height: 1px;
+    }
+
+    .pipe-node[data-link]::after {
+      left: auto;
+      right: calc(100% + 3px);
+      bottom: auto;
+      top: 50%;
+      transform: translateY(-50%) rotate(-45deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .pipe-node {
+      animation: pipe-node 9.8s linear infinite;
+      animation-delay: calc(var(--i) * 1.4s);
+    }
+
+    .pipe-light {
+      animation: pipe-light 9.8s linear infinite;
+      animation-delay: calc(var(--i) * 1.4s);
+    }
+
+    @keyframes pipe-node {
+      0%,
+      13% {
+        border-color: hsl(var(--foreground) / 0.7);
+      }
+
+      18%,
+      100% {
+        border-color: hsl(var(--border));
+      }
+    }
+
+    @keyframes pipe-light {
+      0%,
+      13% {
+        background: hsl(var(--foreground));
+        box-shadow: 0 0 0 4px hsl(var(--foreground) / 0.15);
+      }
+
+      18%,
+      100% {
+        background: hsl(var(--foreground) / 0.2);
+        box-shadow: none;
+      }
+    }
+  }
+}
+
+@layer components {
+  /* ---- Backdrop: pointer light and film grain --------------------------- */
+
+  .backdrop-glow,
+  .backdrop-grain {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .backdrop-glow {
+    background: radial-gradient(
+      34rem circle at var(--gx, 70%) var(--gy, 20%),
+      hsl(var(--foreground) / 0.075),
+      transparent 68%
+    );
+  }
+
+  .backdrop-grain {
+    opacity: 0.07;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ---- Section numerals: large, outlined -------------------------------- */
+
+  .outline-num {
+    color: transparent;
+    -webkit-text-stroke: 1px hsl(var(--foreground) / 0.3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---- Graphics that draw themselves in when scrolled to ----------------- */
+
+  .iv-grow {
+    transform-origin: left center;
+  }
+
+  [data-inview="false"] .iv {
+    opacity: 0;
+  }
+
+  [data-inview="false"] .iv-grow {
+    scale: 0 1;
+  }
+
+  [data-inview="true"] .iv {
+    animation: iv-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(var(--n, 0) * var(--step, 40ms));
+  }
+
+  [data-inview="true"] .iv-grow {
+    animation: iv-grow 1.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(var(--n, 0) * var(--step, 90ms));
+  }
+
+  @keyframes iv-in {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes iv-grow {
+    from {
+      scale: 0 1;
+    }
+
+    to {
+      scale: 1 1;
+    }
+  }
+
+  /* ---- About: words light up as the paragraph is read ------------------- */
+
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .word {
+        animation: word-in linear both;
+        animation-timeline: view();
+        animation-range: entry 100% cover 42%;
+      }
+
+      @keyframes word-in {
+        from {
+          opacity: 0.16;
+        }
+
+        to {
+          opacity: 1;
+        }
+      }
+    }
+  }
+}
