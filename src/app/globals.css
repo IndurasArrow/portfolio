@@ -63,9 +63,10 @@
    ========================================================================== */
 
 :root {
-  /* 11vw on tablets and up; on phones it grows a little faster so the
-     longest word still fits the narrowest screens. */
-  --hero: clamp(2.75rem, max(11vw, min(14.5vw, 4.2rem)), 10.5rem);
+  /* Sized so "Forward Deployed" holds one line from tablets up (the line is
+     about 8.3em wide), and so the longest single word fits the narrowest
+     phones, where the headline breaks into three lines. */
+  --hero: clamp(2.75rem, max(10.6vw, min(17vw, 4.75rem)), 9.3rem);
 }
 
 html {

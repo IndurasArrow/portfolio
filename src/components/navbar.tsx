@@ -1,6 +1,6 @@
 "use client";
 
-import { MoonIcon, SunIcon } from "@radix-ui/react-icons";
+import { DownloadIcon, MoonIcon, SunIcon } from "@radix-ui/react-icons";
 import { useTheme } from "next-themes";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -104,6 +104,18 @@ export default function Navbar() {
               ))}
             </div>
           </nav>
+
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="hidden h-9 gap-1.5 bg-transparent md:inline-flex"
+          >
+            <a href={site.cv} download aria-label="Download CV">
+              <DownloadIcon />
+              CV
+            </a>
+          </Button>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

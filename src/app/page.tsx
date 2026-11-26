@@ -1,4 +1,4 @@
-import { ArrowTopRightIcon } from "@radix-ui/react-icons";
+import { ArrowTopRightIcon, DownloadIcon } from "@radix-ui/react-icons";
 import type { CSSProperties, ReactNode } from "react";
 import { CopyEmail } from "@/components/copy-email";
 import { CountUp } from "@/components/count-up";
@@ -119,9 +119,18 @@ export default function Home() {
         aria-labelledby="hero-title"
         className="flex min-h-[max(calc(100svh-5rem),26rem)] w-11/12 max-w-7xl flex-col justify-end pb-10 pt-10"
       >
-        <p className="fade-up mb-5 text-sm text-muted-foreground" style={delay(500)}>
-          {hero.eyebrow}
-        </p>
+        <div
+          className="fade-up mb-5 flex flex-wrap items-center justify-between gap-x-6 gap-y-3"
+          style={delay(500)}
+        >
+          <p className="text-sm text-muted-foreground">{hero.eyebrow}</p>
+          <Button asChild variant="outline" className="gap-2 bg-transparent">
+            <a href={site.cv} download>
+              <DownloadIcon />
+              Download CV
+            </a>
+          </Button>
+        </div>
         <div className="relative">
           <HeroTitle
             id="hero-title"
@@ -365,6 +374,12 @@ export default function Home() {
             <a href={site.linkedin} target="_blank" rel="noreferrer me">
               LinkedIn
               <ArrowTopRightIcon />
+            </a>
+          </Button>
+          <Button asChild variant="outline" className="gap-2 bg-transparent">
+            <a href={site.cv} download>
+              <DownloadIcon />
+              Download CV
             </a>
           </Button>
         </div>

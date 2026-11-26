@@ -88,9 +88,9 @@ export async function renderSocialImage(size: { width: number; height: number })
             style={{
               display: "flex",
               flexDirection: "column",
-              fontSize: 132,
+              fontSize: 120,
               lineHeight: 1,
-              letterSpacing: -4,
+              letterSpacing: -3.5,
             }}
           >
             {hero.headline.map((line) => (
@@ -101,7 +101,7 @@ export async function renderSocialImage(size: { width: number; height: number })
             style={{
               display: "flex",
               width: 300,
-              marginLeft: -150,
+              marginLeft: -440,
               marginBottom: 22,
               fontSize: 19,
               lineHeight: 1.4,

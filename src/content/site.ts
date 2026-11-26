@@ -27,6 +27,8 @@ export const site = {
   email: "maewal.divyansh@gmail.com",
   linkedin: "https://www.linkedin.com/in/divyansh-maewal-aa711b1a6",
   linkedinLabel: "linkedin.com/in/divyansh-maewal",
+  /** The PDF in /public. Replace the file to update the CV; keep the name. */
+  cv: "/Divyansh_Maewal_CV.pdf",
   title: "Divyansh Maewal · Lead AI Deployment Engineer",
   description:
     "Tech lead and forward-deployed AI engineer who takes products from handover to production: LLM and agentic AI features, speech AI, and the apps, backends, integrations and cloud around them.",
@@ -50,7 +52,7 @@ export const nav = [
 
 export const hero = {
   eyebrow: `${site.role} at ${site.employer}, ${site.employerLocation}`,
-  headline: ["AI Deployment", "Engineer"],
+  headline: ["Forward Deployed", "Engineer"],
   body: "I take AI products from handover to production: the LLM, agent, speech and vision features, and the apps, backends and cloud around them.",
   /** Cycled in the hero, one at a time. */
   rotating: [
