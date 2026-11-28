@@ -15,7 +15,7 @@
     --secondary: 60 4.8% 95.9%;
     --secondary-foreground: 24 9.8% 10%;
     --muted: 60 4.8% 95.9%;
-    --muted-foreground: 25 5.3% 44.7%;
+    --muted-foreground: 25 5.3% 40%;
     --accent: 60 4.8% 95.9%;
     --accent-foreground: 24 9.8% 10%;
     --destructive: 0 84.2% 60.2%;
@@ -24,6 +24,8 @@
     --input: 20 5.9% 90%;
     --ring: 20 14.3% 4.1%;
     --radius: 0.5rem;
+    /* The one colour on the page: particles in motion, and live markers. */
+    --signal: 24 92% 44%;
   }
 
   .dark {
@@ -46,6 +48,7 @@
     --border: 12 6.5% 15.1%;
     --input: 12 6.5% 15.1%;
     --ring: 24 5.7% 82.9%;
+    --signal: 34 100% 58%;
   }
 }
 
@@ -80,7 +83,7 @@ html {
   }
 
   :focus-visible {
-    outline: 1px solid hsl(var(--ring));
+    outline: 2px solid hsl(var(--ring));
     outline-offset: 3px;
   }
 
@@ -568,25 +571,13 @@ html {
 }
 
 @layer components {
-  /* ---- Backdrop: pointer light and film grain --------------------------- */
+  /* ---- Backdrop: film grain ---------------------------------------------- */
 
-  .backdrop-glow,
   .backdrop-grain {
     position: fixed;
     inset: 0;
     z-index: -1;
     pointer-events: none;
-  }
-
-  .backdrop-glow {
-    background: radial-gradient(
-      34rem circle at var(--gx, 70%) var(--gy, 20%),
-      hsl(var(--foreground) / 0.075),
-      transparent 68%
-    );
-  }
-
-  .backdrop-grain {
     opacity: 0.07;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
@@ -655,12 +646,365 @@ html {
 
       @keyframes word-in {
         from {
-          opacity: 0.16;
+          opacity: 0.45;
         }
 
         to {
           opacity: 1;
         }
+      }
+    }
+  }
+}
+
+@layer components {
+  /* ---- Smooth scrolling (Lenis) ----------------------------------------- */
+
+  /* Lenis animates the scroll position itself; native smooth scrolling on
+     top of it would fight every frame. */
+  html.lenis,
+  html.lenis * {
+    scroll-behavior: auto !important;
+  }
+
+  /* ---- Particle swarm ---------------------------------------------------- */
+
+  .swarm {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  /* Names the form the swarm is in, up the left edge on wide screens. */
+  .swarm-readout {
+    position: fixed;
+    left: 1rem;
+    top: 50%;
+    z-index: 30;
+    display: none;
+    align-items: center;
+    gap: 0.6rem;
+    writing-mode: vertical-rl;
+    transform: translateY(-50%) rotate(180deg);
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.6875rem;
+    letter-spacing: 0.06em;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    color: hsl(var(--muted-foreground));
+    pointer-events: none;
+  }
+
+  @media (min-width: 1280px) {
+    .swarm-readout {
+      display: flex;
+    }
+  }
+
+  /* A headline figure as text. Once the swarm is running it draws the figure
+     instead, and the text steps aside (it stays in the accessibility tree). */
+  .stage-fallback {
+    transition: opacity 0.6s ease;
+  }
+
+  html[data-scene="on"] .stage-fallback {
+    opacity: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* The marquees lean into the scroll, by its speed. */
+    .marquee-wrap {
+      transform: skewX(calc(var(--sv, 0) * -7deg));
+      transition: transform 0.35s ease-out;
+    }
+
+    /* Work cards start tipped back into the page and stand up as they
+       scroll in. Runs with the load fade; where scroll timelines are not
+       supported the cards just fade in as before. */
+    @supports (animation-timeline: view()) {
+      .rise {
+        transform-origin: 50% 100%;
+        animation:
+          fade-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) both,
+          rise linear both;
+        animation-delay: var(--d, 0ms), 0s;
+        animation-timeline: auto, view();
+        animation-range: normal, entry 0% entry 90%;
+      }
+
+      @keyframes rise {
+        from {
+          transform: perspective(1300px) translateY(2.5rem) rotateX(20deg)
+            scale(0.94);
+        }
+
+        to {
+          transform: perspective(1300px) rotateX(0deg);
+        }
+      }
+    }
+
+    /* The headline falls back and dims as the page scrolls past it. */
+    @supports (animation-timeline: scroll()) {
+      .hero-exit {
+        transform-origin: left bottom;
+        animation: hero-exit linear both;
+        animation-timeline: scroll(root block);
+        animation-range: 0 85vh;
+      }
+
+      @keyframes hero-exit {
+        to {
+          opacity: 0.45;
+          transform: translateY(-5vh) scale(0.965);
+        }
+      }
+    }
+  }
+}
+
+@layer components {
+  /* ---- Design studies: the cover on a tablet, in 3D ---------------------- */
+
+  .tablet-scene {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    perspective: 900px;
+  }
+
+  /* --rx and --ry come from the card (GlowCard), a few degrees either way as
+     the pointer moves over it; the tablet turns much further than the card. */
+  .tablet {
+    position: relative;
+    width: 74%;
+    aspect-ratio: 1.709;
+    transform-style: preserve-3d;
+    transform: rotateX(calc(9deg + var(--rx, 0deg) * 6))
+      rotateY(calc(-17deg + var(--ry, 0deg) * 9));
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .glow:hover .tablet {
+    transition-duration: 0.18s;
+  }
+
+  .tablet-face,
+  .tablet-edge {
+    position: absolute;
+    inset: 0;
+    border-radius: 4.2% / 7.2%;
+  }
+
+  .tablet-face {
+    padding: 2.6%;
+    background: #1b1a19;
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.16);
+  }
+
+  .tablet-edge {
+    background: #4a4744;
+    transform: translateZ(calc(var(--slice) * -1.5px));
+  }
+
+  .tablet-shadow {
+    position: absolute;
+    inset: 6% 2% -10%;
+    border-radius: 50%;
+    background: rgb(0 0 0 / 0.5);
+    filter: blur(18px);
+    transform: translateZ(-46px) translateY(16%);
+  }
+
+  .tablet-screen {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 2.4% / 4.2%;
+    background: #000;
+  }
+
+  /* A band of light that crosses the glass when the card is pointed at. */
+  .tablet-sheen {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      112deg,
+      transparent 38%,
+      rgb(255 255 255 / 0.2) 50%,
+      transparent 62%
+    );
+    transform: translateX(-70%);
+    transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .glow:hover .tablet-sheen {
+    transform: translateX(70%);
+  }
+
+  /* ---- Card to viewer: one element, as a view transition ------------------ */
+
+  .viewer-visual {
+    view-transition-name: project-visual;
+  }
+
+  /* Its own layer, so the navbar stays above a visual in flight. */
+  .navbar {
+    view-transition-name: navbar;
+  }
+
+  @supports (view-transition-name: none) {
+    /* The transition is the entrance; the older slide-in would double it. */
+    @media (prefers-reduced-motion: no-preference) {
+      .viewer {
+        animation: none;
+      }
+    }
+  }
+}
+
+/* Quick, and decelerating: the visual is most of the way there early. */
+::view-transition-group(project-visual) {
+  animation-duration: 0.36s;
+  animation-timing-function: cubic-bezier(0.2, 0.85, 0.2, 1);
+}
+
+::view-transition-old(project-visual),
+::view-transition-new(project-visual) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation-duration: 0.22s;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.24s;
+}
+
+@layer components {
+  /* ---- Touch: controls at a comfortable size ----------------------------- */
+
+  /* On a touch screen anything marked `tap` is at least 44px each way. With
+     a mouse the denser sizes stand. */
+  @media (pointer: coarse) {
+    .tap {
+      min-width: 2.75rem;
+      min-height: 2.75rem;
+    }
+  }
+
+  /* ---- Pause animations --------------------------------------------------- */
+
+  /* "Pause animations" in the display menu sets data-motion="off". Everything
+     that moves by itself and keeps going is stopped where it is; the particle
+     swarm and the hero's cycling phrase read the same attribute. Reveals tied
+     to scrolling are the visitor's own doing and carry on. */
+  html[data-motion="off"]
+    :is(
+      .marquee,
+      .pipe-node,
+      .pipe-light,
+      .v-ring,
+      .v-bar,
+      .v-dash,
+      .v-blink,
+      .v-scan,
+      .v-pop,
+      .swarm-seed-dot::before,
+      .swarm-seed-dot::after,
+      .animate-pulse
+    ) {
+    animation-play-state: paused !important;
+  }
+
+  /* ---- Hero: the rail under the headline ---------------------------------- */
+
+  @media (prefers-reduced-motion: no-preference) {
+    .lately-run {
+      animation: lately-run linear both;
+    }
+
+    @keyframes lately-run {
+      from {
+        transform: scaleX(0);
+      }
+
+      to {
+        transform: scaleX(1);
+      }
+    }
+  }
+
+  /* ---- Hero: the seed the swarm starts from -------------------------------- */
+
+  /* Shown in the swarm's place from the first paint until the swarm is
+     running (or is known not to be coming), then faded out. */
+  .swarm-seed {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    transition: opacity 0.5s ease;
+  }
+
+  html[data-scene="on"] .swarm-seed,
+  html[data-scene="off"] .swarm-seed {
+    opacity: 0;
+  }
+
+  .swarm-seed-dot {
+    position: relative;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: hsl(var(--signal));
+  }
+
+  .swarm-seed-dot::before,
+  .swarm-seed-dot::after {
+    content: "";
+    position: absolute;
+    inset: -1.75rem;
+    border-radius: 9999px;
+    border: 1px solid hsl(var(--signal) / 0.7);
+    opacity: 0;
+  }
+
+  .swarm-seed-text {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    color: hsl(var(--muted-foreground));
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .swarm-seed-dot::before,
+    .swarm-seed-dot::after {
+      animation: seed-ring 1.8s ease-out infinite;
+    }
+
+    .swarm-seed-dot::after {
+      animation-delay: 0.9s;
+    }
+
+    @keyframes seed-ring {
+      from {
+        transform: scale(0.15);
+        opacity: 0.9;
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 0;
       }
     }
   }

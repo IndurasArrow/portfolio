@@ -24,6 +24,9 @@ export const site = {
   employerLocation: "New Delhi",
   location: "Kanpur, Uttar Pradesh, India",
   timezone: "IST, UTC+5:30",
+  /** The same zone by its IANA name and short name, for the live clock. */
+  timezoneId: "Asia/Kolkata",
+  timezoneShort: "IST",
   email: "maewal.divyansh@gmail.com",
   linkedin: "https://www.linkedin.com/in/divyansh-maewal-aa711b1a6",
   linkedinLabel: "linkedin.com/in/divyansh-maewal",
@@ -54,14 +57,17 @@ export const hero = {
   eyebrow: `${site.role} at ${site.employer}, ${site.employerLocation}`,
   headline: ["Forward Deployed", "Engineer"],
   body: "I take AI products from handover to production: the LLM, agent, speech and vision features, and the apps, backends and cloud around them.",
-  /** Cycled in the hero, one at a time. */
+  /**
+   * Cycled in the hero, one at a time. `shape` is the form the particle
+   * swarm takes while the item shows (see `src/lib/shapes.ts`).
+   */
   rotating: [
-    "agentic AI",
-    "LLM apps and RAG",
-    "live speech translation",
-    "vision analytics",
-    "cloud cut-overs",
-    "full-stack platforms",
+    { label: "agentic AI", shape: "agentic" },
+    { label: "LLM apps and RAG", shape: "llm" },
+    { label: "live speech translation", shape: "speech" },
+    { label: "vision analytics", shape: "vision" },
+    { label: "cloud cut-overs", shape: "cutover" },
+    { label: "full-stack platforms", shape: "stack" },
   ],
 };
 

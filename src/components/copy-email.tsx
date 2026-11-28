@@ -23,7 +23,7 @@ export function CopyEmail({ email }: { email: string }) {
   }
 
   return (
-    <Button variant="outline" onClick={copy} className="gap-2 bg-transparent">
+    <Button variant="outline" onClick={copy} className="tap gap-2 bg-transparent">
       {copied ? <CheckIcon /> : <CopyIcon />}
       <span aria-live="polite">{copied ? "Copied" : "Copy address"}</span>
     </Button>

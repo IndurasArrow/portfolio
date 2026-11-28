@@ -2,16 +2,26 @@
 
 import { DownloadIcon, MoonIcon, SunIcon } from "@radix-ui/react-icons";
 import { useTheme } from "next-themes";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { nav, site } from "@/content/site";
+import { motion } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 const useIsoLayoutEffect =
@@ -24,6 +34,14 @@ export default function Navbar() {
     null,
   );
   const listRef = useRef<HTMLDivElement>(null);
+  const paused = useSyncExternalStore(
+    motion.subscribe,
+    motion.paused,
+    motion.pausedOnServer,
+  );
+
+  // Pick up "Pause animations" from an earlier visit.
+  useEffect(() => motion.restore(), []);
 
   // Which section is under the navbar right now.
   useEffect(() => {
@@ -64,15 +82,22 @@ export default function Navbar() {
   }, [active]);
 
   return (
-    <div className="fixed top-4 z-50 flex w-full justify-center">
+    <header className="navbar fixed top-4 z-50 flex w-full justify-center">
       <Card className="relative z-20 flex max-h-12 w-11/12 max-w-[83rem] sm:w-[calc(91.666667%+3rem)] items-center justify-between bg-card/70 px-3 py-6 shadow-none backdrop-blur-xl backdrop-saturate-150 sm:pl-6 sm:pr-4">
+        {/* The words on screen are part of the link's name, so it can be
+            asked for by voice as it reads. */}
         <a
           href="#top"
-          className="cursor-pointer pl-1.5 text-sm sm:pl-0"
-          aria-label={`${site.name}, back to top`}
+          className="tap inline-flex cursor-pointer items-center py-2 pl-1.5 text-sm sm:pl-0"
         >
-          <span className="hidden md:block">{site.name}</span>
-          <span className="block md:hidden">{site.initials}</span>
+          <span className="hidden md:block">
+            {site.name}
+            <span className="sr-only">, back to top</span>
+          </span>
+          <span className="block md:hidden">
+            {site.initials}
+            <span className="sr-only">, {site.name}, back to top</span>
+          </span>
         </a>
 
         <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
@@ -92,11 +117,11 @@ export default function Navbar() {
                   data-nav={item.id}
                   aria-current={active === item.id ? "true" : undefined}
                   className={cn(
-                    "relative rounded-md px-2 py-1.5 text-sm transition-colors sm:px-2.5 md:px-3",
+                    "tap relative inline-flex items-center justify-center rounded-md px-1.5 py-1.5 text-sm transition-colors min-[360px]:px-2 sm:px-2.5 md:px-3",
                     active === item.id
                       ? "text-foreground"
                       : "text-muted-foreground hover:text-foreground",
-                    !item.mobile && "hidden md:block",
+                    !item.mobile && "hidden md:inline-flex",
                   )}
                 >
                   {item.label}
@@ -119,13 +144,16 @@ export default function Navbar() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" className="bg-transparent">
-                <SunIcon className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                <MoonIcon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                <span className="sr-only">Toggle theme</span>
+              <Button variant="outline" size="icon" className="tap bg-transparent">
+                <SunIcon className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-transform dark:-rotate-90 dark:scale-0" />
+                <MoonIcon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-transform dark:rotate-0 dark:scale-100" />
+                <span className="sr-only">Display: theme and animation</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="min-w-44">
+              <DropdownMenuLabel className="font-normal text-muted-foreground">
+                Theme
+              </DropdownMenuLabel>
               <DropdownMenuItem onClick={() => setTheme("light")}>
                 Light
               </DropdownMenuItem>
@@ -135,12 +163,21 @@ export default function Navbar() {
               <DropdownMenuItem onClick={() => setTheme("system")}>
                 System
               </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              {/* Stops everything that moves by itself: the particle swarm,
+                  the cycling phrase, the marquees and the looping diagrams. */}
+              <DropdownMenuCheckboxItem
+                checked={paused}
+                onCheckedChange={(checked) => motion.set(checked === true)}
+              >
+                Pause animations
+              </DropdownMenuCheckboxItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
 
         <span className="nav-progress" aria-hidden="true" />
       </Card>
-    </div>
+    </header>
   );
 }

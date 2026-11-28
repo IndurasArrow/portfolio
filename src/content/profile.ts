@@ -89,8 +89,16 @@ export type Role = {
   company: string;
   place: string;
   period: string;
+  /** The same dates as `period`, as "YYYY-MM", for working out the length. */
+  start: string;
+  /** `null` while the role is current. */
+  end: string | null;
   current: boolean;
+  /** What the role was about, in a few words each: shown as tags. */
+  focus: string[];
   points: string[];
+  /** Projects on this site that were done in the role, by id, as workstreams. */
+  projects?: string[];
 };
 
 export const roles: Role[] = [
@@ -99,7 +107,27 @@ export const roles: Role[] = [
     company: "Super AI Polaris",
     place: "New Delhi",
     period: "Dec 2025 to present",
+    start: "2025-12",
+    end: null,
     current: true,
+    focus: [
+      "Tech lead",
+      "Forward-deployed",
+      "Client-facing",
+      "Build, deployment and audit",
+      "Demo to production cut-over",
+    ],
+    // In the order the CV lists them.
+    projects: [
+      "food-delivery",
+      "crm",
+      "speech-translation",
+      "education",
+      "lc-checker",
+      "vision",
+      "ops",
+      "demos",
+    ],
     points: [
       "Tech lead on most client and internal projects; hands-on in build, deployment and audit.",
       "Client-facing from demo and proof of concept through production cut-over.",
@@ -110,7 +138,16 @@ export const roles: Role[] = [
     company: "Local Hearts",
     place: "Pune",
     period: "Feb 2024 to Jan 2025",
+    start: "2024-02",
+    end: "2025-01",
     current: false,
+    focus: [
+      "Technical lead",
+      "Website build",
+      "Integrations",
+      "Technical reports",
+      "Investor reports",
+    ],
     points: [
       "Led technical development of the company, from building the website to integrations.",
       "Authored technical and investor reports for data-driven solutions.",
@@ -121,7 +158,10 @@ export const roles: Role[] = [
     company: "Angle.Services",
     place: "Pune",
     period: "Jan 2023 to Feb 2024",
+    start: "2023-01",
+    end: "2024-02",
     current: false,
+    focus: ["Responsive web", "Client platforms", "Design to deployment"],
     points: [
       "Designed and deployed responsive web platforms for a range of clients.",
     ],
@@ -313,11 +353,15 @@ export const education = [
     school: "Daksh Gurukul × IIT Guwahati",
     note: "Online programme. Module III score 91.4%.",
     year: "",
+    figure: { value: "91.4%", label: "Module III score" },
+    focus: ["Data science", "Online programme", "Credit-linked"],
   },
   {
     title: "B.Des, UX/UI",
     school: "MIT Pune",
     note: "8.4 CGPA.",
     year: "2023",
+    figure: { value: "8.4", label: "CGPA" },
+    focus: ["User research", "Interface design", "Product-design case studies"],
   },
 ];

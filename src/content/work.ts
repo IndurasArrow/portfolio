@@ -73,6 +73,20 @@ export type Figure =
       note?: string;
     };
 
+/**
+ * What a design study's document is, for the panel beside it in the viewer.
+ * The tagline is the one on the study's own cover; the screens are those the
+ * document shows, in its order.
+ */
+export type Study = {
+  tagline: string;
+  brief: string;
+  focus: string[];
+  screens?: string[];
+  /** The document on its own page, for reading at full size. */
+  link: string;
+};
+
 export type Project = {
   id: string;
   title: string;
@@ -87,6 +101,7 @@ export type Project = {
   /** Design studies use a cover image and open an embedded document. */
   image?: StaticImageData;
   embed?: string;
+  study?: Study;
   lead?: string;
   metrics?: Metric[];
   points?: Point[];
@@ -97,6 +112,7 @@ export type Project = {
 };
 
 const drive = (id: string) => `https://drive.google.com/file/d/${id}/preview`;
+const driveView = (id: string) => `https://drive.google.com/file/d/${id}/view`;
 
 /**
  * Order matters: the first card is the wide one, the next six are half-width,
@@ -538,6 +554,13 @@ export const projects: Project[] = [
     period: "Design study",
     image: plantCare,
     embed: drive("1-BUgz7JD6IXPZVvAfpzeGbkj4bR3e6-S"),
+    study: {
+      tagline: "Water your plants when not at home, with one click.",
+      brief:
+        "A mobile app concept for looking after house plants from a distance: a watering is started with a single tap, wherever you are.",
+      focus: ["Mobile app", "Remote control", "One-tap action", "Visual identity"],
+      link: driveView("1-BUgz7JD6IXPZVvAfpzeGbkj4bR3e6-S"),
+    },
   },
   {
     id: "health-care",
@@ -547,6 +570,21 @@ export const projects: Project[] = [
     period: "Design study",
     image: healthCare,
     embed: drive("10Vad8qUQWH35hss8drF-Awajn-hrx-Pd"),
+    study: {
+      tagline: "A simple health-management interface for a hospital's front office.",
+      brief:
+        "A web dashboard for hospital administrators: the day's appointments, new patients, operations and earnings at a glance, and the full appointment list one step away.",
+      focus: ["Web dashboard", "Data tables", "Charts", "Admin navigation", "UI kit"],
+      screens: [
+        "Dashboard: appointments, new patients, operations and hospital earnings",
+        "Hospital survey: patients by month, this year against last",
+        "Income for the current month and the current week",
+        "Appointment activity: patient, date, visit time, doctor and condition",
+        "Appointments: the full list, paged",
+        "Navigation: dashboard, appointments, doctors, departments, patients, payments",
+      ],
+      link: driveView("10Vad8qUQWH35hss8drF-Awajn-hrx-Pd"),
+    },
   },
   {
     id: "pillo",
@@ -556,5 +594,20 @@ export const projects: Project[] = [
     period: "Design study",
     image: pillo,
     embed: drive("1tUntOUP5qq2kJ1w14QuydhCiFkTFFHI7"),
+    study: {
+      tagline: "Always take your meds on time.",
+      brief:
+        "A medication-reminder app: a plan for each medicine (how much, for how long, before or after food) and a reminder at the right time, with a daily review of what was taken and what was skipped.",
+      focus: ["Mobile app", "Onboarding", "Scheduling", "Reminders", "Illustration"],
+      screens: [
+        "Onboarding: \"Medicine: timing is everything\"",
+        "Sign in, by email or with Google or Facebook",
+        "Home: the plan for today, and a daily review of doses taken and skipped",
+        "Add plan: pill name, amount, duration, food timing and reminder time",
+        "Edit plan",
+        "Profile: pills, notifications, help and log out",
+      ],
+      link: driveView("1tUntOUP5qq2kJ1w14QuydhCiFkTFFHI7"),
+    },
   },
 ];

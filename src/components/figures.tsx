@@ -81,7 +81,7 @@ export function StatGraphicView({ graphic }: { graphic: StatGraphic }) {
                 {i < graphic.steps.length - 1 && (
                   <span className="absolute left-7 right-0 top-[0.6875rem] h-px bg-foreground/30" />
                 )}
-                <span className="flex h-[1.375rem] w-[1.375rem] items-center justify-center rounded-full border border-foreground/60 text-[0.6875rem]">
+                <span className="flex h-[1.375rem] w-[1.375rem] items-center justify-center rounded-full border border-foreground/60 text-xs">
                   {i + 1}
                 </span>
                 <span className="mt-2 block text-xs leading-snug">{step}</span>

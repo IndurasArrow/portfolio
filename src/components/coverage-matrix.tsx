@@ -40,7 +40,7 @@ export function CoverageMatrix() {
                 <button
                   type="button"
                   onClick={() => open(project.id)}
-                  className="block w-full truncate py-2.5 text-left text-muted-foreground transition-colors group-hover:text-foreground"
+                  className="tap block w-full cursor-pointer py-2.5 text-left leading-snug text-muted-foreground transition-colors group-hover:text-foreground"
                 >
                   {project.title}
                 </button>

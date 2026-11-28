@@ -2,7 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import Backdrop from "@/components/backdrop";
 import Navbar from "@/components/navbar";
-import ParticlesBackground from "@/components/particles-background";
+import SmoothScroll from "@/components/smooth-scroll";
+import Swarm from "@/components/swarm";
 import ThemeProvider from "@/components/theme-provider";
 import { ViewerProvider } from "@/components/viewer";
 import { site } from "@/content/site";
@@ -117,14 +118,15 @@ export default function RootLayout({
         >
           <a
             href="#main"
-            className="fixed left-4 top-[-4rem] z-[60] rounded-md bg-foreground px-3 py-2 text-sm text-background transition-[top] focus:top-4"
+            className="tap fixed left-4 top-[-4rem] z-[60] inline-flex items-center rounded-md bg-foreground px-3 py-2 text-sm text-background transition-[top] focus:top-4"
           >
             Skip to content
           </a>
           <Navbar />
           <ViewerProvider>{children}</ViewerProvider>
           <Backdrop />
-          <ParticlesBackground />
+          <Swarm />
+          <SmoothScroll />
         </ThemeProvider>
       </body>
     </html>

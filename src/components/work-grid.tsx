@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useState, type CSSProperties } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -9,6 +8,7 @@ import { projects, type DomainId } from "@/content/work";
 import { cn } from "@/lib/utils";
 import { GlowCard } from "./glow-card";
 import { ProjectVisual } from "./project-visual";
+import { Tablet } from "./tablet";
 import { useOpenProject } from "./viewer";
 
 type Filter = DomainId | "all";
@@ -49,10 +49,10 @@ export function WorkGrid() {
             variant={filter === item.id ? "default" : "outline"}
             aria-pressed={filter === item.id}
             onClick={() => setFilter(item.id)}
-            className={cn("gap-1.5", filter !== item.id && "bg-transparent")}
+            className={cn("tap gap-1.5", filter !== item.id && "bg-transparent")}
           >
             {item.label}
-            <span className="tabular-nums opacity-50">{item.count}</span>
+            <span className="tabular-nums opacity-70">{item.count}</span>
           </Button>
         ))}
       </div>
@@ -68,7 +68,7 @@ export function WorkGrid() {
             <li
               key={project.id}
               className={cn(
-                "fade-up",
+                "fade-up rise",
                 wide
                   ? "sm:col-span-6"
                   : third
@@ -91,16 +91,12 @@ export function WorkGrid() {
                   aria-label={`Open ${project.title}`}
                 />
                 <Card className="rounded-2xl p-1 shadow-none">
-                  <div className="relative aspect-video w-full overflow-hidden rounded-xl">
+                  <div
+                    data-project-visual={project.id}
+                    className="relative aspect-video w-full overflow-hidden rounded-xl"
+                  >
                     {project.image ? (
-                      <Image
-                        src={project.image}
-                        alt=""
-                        fill
-                        placeholder="blur"
-                        sizes="(min-width: 1024px) 400px, (min-width: 640px) 46vw, 92vw"
-                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
-                      />
+                      <Tablet image={project.image} />
                     ) : (
                       project.visual && (
                         <div className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-[1.04]">

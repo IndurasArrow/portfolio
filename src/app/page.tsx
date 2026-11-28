@@ -1,42 +1,55 @@
-import { ArrowTopRightIcon, DownloadIcon } from "@radix-ui/react-icons";
+import {
+  ArrowDownIcon,
+  ArrowTopRightIcon,
+  DownloadIcon,
+} from "@radix-ui/react-icons";
 import type { CSSProperties, ReactNode } from "react";
 import { CopyEmail } from "@/components/copy-email";
 import { CountUp } from "@/components/count-up";
 import { CoverageMatrix } from "@/components/coverage-matrix";
 import { DomainExplorer } from "@/components/domain-explorer";
+import { Education, Experience } from "@/components/experience";
 import { StatGraphicView } from "@/components/figures";
 import { HeroTitle } from "@/components/hero-title";
+import {
+  LatelyProvider,
+  LatelyRail,
+  LatelyStage,
+  LatelyWord,
+} from "@/components/lately";
+import { LocalTime } from "@/components/local-time";
 import { Pipeline } from "@/components/pipeline";
-import { Rotator } from "@/components/rotator";
 import { Timeline } from "@/components/timeline";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WorkGrid } from "@/components/work-grid";
-import {
-  domains,
-  education,
-  method,
-  roles,
-  skills,
-  timeline,
-} from "@/content/profile";
+import { domains, method, skills, timeline } from "@/content/profile";
 import { about, hero, ledger, site } from "@/content/site";
+import { cn } from "@/lib/utils";
 
 const delay = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
 
-/** A page section in the original rhythm: a rule, a large light heading, content. */
+/**
+ * A page section in the original rhythm: a rule, a large light heading,
+ * content. `shape` names the form the particle swarm takes beside the
+ * heading on wide screens (see `src/lib/shapes.ts`).
+ */
 function Block({
   id,
   index,
   title,
   intro,
+  shape,
+  shapeLabel,
   children,
 }: {
   id: string;
   index: string;
   title: string;
   intro?: string;
+  shape?: string;
+  shapeLabel?: string;
   children: ReactNode;
 }) {
   return (
@@ -48,7 +61,15 @@ function Block({
       <div className="flex w-11/12 max-w-7xl py-2">
         <hr className="w-full bg-input" />
       </div>
-      <div className="w-11/12 max-w-7xl flex-col pb-16 pt-12 md:pb-24">
+      <div className="relative w-11/12 max-w-7xl flex-col pb-16 pt-12 md:pb-24">
+        {shape && (
+          <div
+            aria-hidden="true"
+            data-shape={shape}
+            data-label={shapeLabel}
+            className="pointer-events-none absolute right-0 top-2 hidden h-44 w-44 lg:block xl:right-36 xl:w-72"
+          />
+        )}
         <div className="reveal flex items-end justify-between gap-6">
           <h2
             id={`${id}-title`}
@@ -91,7 +112,7 @@ function Marquee({
         {[0, 1].map((copy) => (
           <ul
             key={copy}
-            aria-hidden={copy === 1}
+            aria-hidden={copy === 1 ? true : undefined}
             className={`flex shrink-0 items-center ${className}`}
           >
             {items.map((item) => (
@@ -115,39 +136,81 @@ export default function Home() {
   return (
     <main id="main" className="mt-20 flex w-full flex-col items-center">
       {/* ------------------------------------------------------------ Hero */}
-      <section
-        aria-labelledby="hero-title"
-        className="flex min-h-[max(calc(100svh-5rem),26rem)] w-11/12 max-w-7xl flex-col justify-end pb-10 pt-10"
-      >
-        <div
-          className="fade-up mb-5 flex flex-wrap items-center justify-between gap-x-6 gap-y-3"
-          style={delay(500)}
+      <LatelyProvider count={hero.rotating.length}>
+        <section
+          aria-labelledby="hero-title"
+          className="flex min-h-[max(calc(100svh-5rem),30rem)] w-11/12 max-w-7xl flex-col pb-10 pt-2"
         >
-          <p className="text-sm text-muted-foreground">{hero.eyebrow}</p>
-          <Button asChild variant="outline" className="gap-2 bg-transparent">
-            <a href={site.cv} download>
-              <DownloadIcon />
-              Download CV
-            </a>
-          </Button>
-        </div>
-        <div className="relative">
-          <HeroTitle
-            id="hero-title"
-            lines={hero.headline}
-            prefix={`${site.name},`}
-          />
-          <div
-            className="fade-up mt-5 max-w-sm text-sm text-muted-foreground lg:absolute lg:bottom-[calc(var(--hero)*0.17)] lg:left-[calc(var(--hero)*4.62)] lg:mt-0 lg:max-w-[21rem] xl:max-w-[19rem]"
-            style={delay(650)}
-          >
-            <p>{hero.body}</p>
-            <p className="mt-3">
-              Lately: <Rotator words={hero.rotating} />
-            </p>
+          {/* Where the swarm gathers on arrival. It draws whatever "Lately"
+              is naming below, and changes with it. The stage takes whatever
+              room the text leaves, so the swarm is never behind the words. */}
+          <div className="relative min-h-28 flex-1 sm:min-h-40">
+            <LatelyStage
+              items={hero.rotating}
+              className="pointer-events-none absolute inset-y-0 left-1/2 aspect-square max-w-full -translate-x-1/2 lg:left-auto lg:right-0 lg:translate-x-0"
+            />
           </div>
-        </div>
-      </section>
+          <div
+            className="fade-up mb-5 mt-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-3"
+            style={delay(500)}
+          >
+            <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+              <span className="flex items-center gap-2">
+                <span
+                  aria-hidden="true"
+                  className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-signal"
+                />
+                {hero.eyebrow}
+              </span>
+              <span aria-hidden="true" className="hidden opacity-40 sm:inline">
+                /
+              </span>
+              <LocalTime
+                zone={site.timezoneId}
+                label={site.timezoneShort}
+                place="Kanpur"
+              />
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Button asChild className="tap gap-2">
+                <a href="#work">
+                  See the work
+                  <ArrowDownIcon />
+                </a>
+              </Button>
+              <Button asChild variant="outline" className="tap gap-2 bg-transparent">
+                <a href={site.cv} download>
+                  <DownloadIcon />
+                  Download CV
+                </a>
+              </Button>
+            </div>
+          </div>
+          <div className="hero-exit relative">
+            <HeroTitle
+              id="hero-title"
+              lines={hero.headline}
+              prefix={`${site.name},`}
+            />
+            <div
+              className="fade-up mt-5 max-w-sm text-base text-muted-foreground lg:absolute lg:bottom-[calc(var(--hero)*0.17)] lg:left-[calc(var(--hero)*4.62)] lg:mt-0 lg:max-w-[21rem] lg:text-sm xl:max-w-[19rem]"
+              style={delay(650)}
+            >
+              <p>{hero.body}</p>
+              <p className="mt-3">
+                Lately: <LatelyWord items={hero.rotating} />
+              </p>
+            </div>
+          </div>
+          {/* The same six items as a rail: how long the current one has
+              left, and a way to pick one for the swarm to draw. */}
+          <LatelyRail
+            items={hero.rotating}
+            className="fade-up mt-8"
+            style={delay(800)}
+          />
+        </section>
+      </LatelyProvider>
 
       {/* --------------------------------------------------------- Numbers */}
       <section
@@ -157,30 +220,51 @@ export default function Home() {
         <div className="flex w-11/12 max-w-7xl py-2">
           <hr className="w-full bg-input" />
         </div>
-        <dl className="grid w-11/12 max-w-7xl grid-cols-1 gap-x-6 gap-y-14 py-16 min-[520px]:grid-cols-2 md:py-24 lg:grid-cols-4">
-          {ledger.map((metric, i) => (
-            <div
-              key={metric.label}
-              className="reveal flex flex-col gap-3"
-              style={delay(i * 80)}
-            >
-              <dt className="order-2">{metric.label}</dt>
-              <dd className="order-1 text-6xl font-light tracking-tighter lg:text-7xl xl:text-8xl">
-                <CountUp value={metric.value} />
-                {metric.unit && (
-                  <span className="ml-2 text-3xl text-muted-foreground">
-                    {metric.unit}
+        {/* Each figure is drawn by the swarm in the space beside its caption.
+            The figure is in the markup too: it is what a screen reader reads
+            and what shows where the swarm cannot run. */}
+        <dl className="w-11/12 max-w-7xl py-6 md:py-10">
+          {ledger.map((metric, i) => {
+            const figure = `${metric.value}${metric.unit ?? ""}`;
+            return (
+              <div
+                key={metric.label}
+                className="flex flex-col gap-y-4 py-10 md:py-16 lg:grid lg:min-h-[78svh] lg:grid-cols-12 lg:grid-rows-[1fr_auto_auto_1fr] lg:items-center lg:gap-x-12"
+              >
+                <dt
+                  className={cn(
+                    "reveal order-2 text-2xl font-light leading-snug tracking-tight md:text-3xl lg:order-none lg:col-span-4 lg:row-start-2",
+                    i % 2 === 1 ? "lg:col-start-1" : "lg:col-start-9",
+                  )}
+                >
+                  {metric.label}
+                </dt>
+                <dd
+                  data-shape={`text:${figure}`}
+                  data-label={metric.label}
+                  className={cn(
+                    "order-1 flex aspect-[2/1] w-full items-center justify-center lg:order-none lg:col-span-8 lg:row-span-full lg:row-start-1",
+                    i % 2 === 1 ? "lg:col-start-5" : "lg:col-start-1",
+                  )}
+                >
+                  <span className="stage-fallback text-7xl font-light tracking-tighter sm:text-8xl lg:text-[11rem]">
+                    {figure}
                   </span>
-                )}
-              </dd>
-              <dd className="order-3 mt-3">
-                {metric.graphic && <StatGraphicView graphic={metric.graphic} />}
-                <p className="mt-4 max-w-[17rem] text-sm text-muted-foreground">
-                  {metric.detail}
-                </p>
-              </dd>
-            </div>
-          ))}
+                </dd>
+                <dd
+                  className={cn(
+                    "reveal order-3 lg:order-none lg:col-span-4 lg:row-start-3",
+                    i % 2 === 1 ? "lg:col-start-1" : "lg:col-start-9",
+                  )}
+                >
+                  {metric.graphic && <StatGraphicView graphic={metric.graphic} />}
+                  <p className="mt-4 max-w-[19rem] text-sm text-muted-foreground">
+                    {metric.detail}
+                  </p>
+                </dd>
+              </div>
+            );
+          })}
         </dl>
       </section>
 
@@ -189,16 +273,18 @@ export default function Home() {
         id="work"
         index="01"
         title="Work"
+        shape="stack"
+        shapeLabel="Work"
         intro="Client work, internal platforms, personal projects and the design studies I started with. Filter by domain; open any card for the full story."
       >
         <WorkGrid />
       </Block>
 
       {/* ---------------------------------------------------------- Domains */}
-      <div className="w-full py-10 md:py-16" aria-hidden="true">
+      <div className="w-full overflow-x-clip py-10 md:py-16" aria-hidden="true">
         <Marquee
           items={domains.map((domain) => domain.title)}
-          className="text-7xl font-light tracking-tight text-foreground/20 md:text-9xl"
+          className="text-7xl font-light tracking-tight text-foreground/50 md:text-9xl"
         />
       </div>
 
@@ -227,7 +313,7 @@ export default function Home() {
         <Tabs defaultValue={skills[0]?.group} className="reveal mt-6">
           <TabsList className="h-auto flex-wrap justify-start gap-1">
             {skills.map((skill) => (
-              <TabsTrigger key={skill.group} value={skill.group}>
+              <TabsTrigger key={skill.group} value={skill.group} className="tap">
                 {skill.group}
               </TabsTrigger>
             ))}
@@ -252,7 +338,14 @@ export default function Home() {
       </Block>
 
       {/* ---------------------------------------------------------- Method */}
-      <Block id="method" index="03" title="Method" intro={method.intro}>
+      <Block
+        id="method"
+        index="03"
+        title="Method"
+        intro={method.intro}
+        shape="pipeline"
+        shapeLabel="Spec, plan, task loop, review, merge"
+      >
         <div className="reveal">
           <Pipeline />
         </div>
@@ -272,7 +365,13 @@ export default function Home() {
       </Block>
 
       {/* ----------------------------------------------------------- About */}
-      <Block id="about" index="04" title="About">
+      <Block
+        id="about"
+        index="04"
+        title="About"
+        shape="strands"
+        shapeLabel={`${timeline.year} workstreams`}
+      >
         <p className="max-w-4xl text-2xl font-light leading-snug tracking-tight md:text-4xl md:leading-[1.2]">
           {about.split(" ").map((word, i) => (
             <span key={i} className="word">
@@ -293,75 +392,43 @@ export default function Home() {
           <Timeline />
         </div>
 
-        <div className="mt-20 grid gap-x-12 gap-y-16 lg:grid-cols-12">
-          <div className="lg:col-span-7">
+        <div className="mt-20 grid gap-x-10 gap-y-16 lg:grid-cols-12">
+          <div className="lg:col-span-8">
             <h3 className="reveal text-3xl font-light tracking-tight">
               Experience
             </h3>
-            <ol className="mt-6 border-t">
-              {roles.map((role) => (
-                <li key={role.company} className="reveal border-b py-6">
-                  <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
-                    <h4 className="text-xl font-medium">{role.title}</h4>
-                    <span className="flex items-center gap-2 text-sm text-muted-foreground">
-                      {role.current && (
-                        <span
-                          aria-hidden="true"
-                          className="h-1.5 w-1.5 animate-pulse rounded-full bg-foreground"
-                        />
-                      )}
-                      {role.period}
-                    </span>
-                  </div>
-                  <p className="mt-1 text-muted-foreground">
-                    {role.company}, {role.place}
-                  </p>
-                  <ul className="mt-3 space-y-1.5">
-                    {role.points.map((point) => (
-                      <li key={point}>{point}</li>
-                    ))}
-                  </ul>
-                </li>
-              ))}
-            </ol>
+            <Experience />
           </div>
 
-          <div className="lg:col-span-5">
+          <div className="lg:col-span-4">
             <h3 className="reveal text-3xl font-light tracking-tight">
               Education
             </h3>
-            <ul className="mt-6 border-t">
-              {education.map((item) => (
-                <li key={item.title} className="reveal border-b py-6">
-                  <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
-                    <h4 className="text-xl font-medium">{item.title}</h4>
-                    {item.year && (
-                      <span className="text-sm text-muted-foreground">{item.year}</span>
-                    )}
-                  </div>
-                  <p className="mt-1 text-muted-foreground">{item.school}</p>
-                  <p className="mt-3">{item.note}</p>
-                </li>
-              ))}
-            </ul>
+            <Education />
           </div>
         </div>
       </Block>
 
       {/* --------------------------------------------------------- Contact */}
-      <div className="w-full pb-4 pt-10" aria-hidden="true">
+      <div className="w-full overflow-x-clip pb-4 pt-10" aria-hidden="true">
         <Marquee
           items={tools}
           reverse
-          className="text-2xl font-light text-foreground/30 md:text-3xl"
+          className="text-2xl font-light text-foreground/50 md:text-3xl"
         />
       </div>
 
-      <Block id="contact" index="05" title="Contact">
+      <Block
+        id="contact"
+        index="05"
+        title="Contact"
+        shape="globe"
+        shapeLabel="Kanpur, 26.45°N 80.33°E"
+      >
         <p className="reveal text-muted-foreground">Email</p>
         <a
           href={`mailto:${site.email}`}
-          className="reveal group mt-2 inline-block max-w-full text-[clamp(1.1rem,5.6vw,5rem)] font-light leading-tight tracking-tight"
+          className="reveal group mt-2 inline-block max-w-full py-1 text-[clamp(1.1rem,5.6vw,5rem)] font-light leading-tight tracking-tight"
         >
           <span className="bg-gradient-to-r from-foreground to-foreground bg-[length:0%_1px] bg-left-bottom bg-no-repeat pb-1 transition-[background-size] duration-500 ease-out group-hover:bg-[length:100%_1px]">
             {site.email}
@@ -370,13 +437,13 @@ export default function Home() {
 
         <div className="reveal mt-8 flex flex-wrap gap-3">
           <CopyEmail email={site.email} />
-          <Button asChild variant="outline" className="gap-2 bg-transparent">
+          <Button asChild variant="outline" className="tap gap-2 bg-transparent">
             <a href={site.linkedin} target="_blank" rel="noreferrer me">
               LinkedIn
               <ArrowTopRightIcon />
             </a>
           </Button>
-          <Button asChild variant="outline" className="gap-2 bg-transparent">
+          <Button asChild variant="outline" className="tap gap-2 bg-transparent">
             <a href={site.cv} download>
               <DownloadIcon />
               Download CV
@@ -406,7 +473,7 @@ export default function Home() {
         <p>
           © {new Date().getFullYear()} {site.name}
         </p>
-        <a href="#top" className="transition-colors hover:text-foreground">
+        <a href="#top" className="py-2 transition-colors hover:text-foreground">
           Back to top
         </a>
       </footer>

@@ -15,13 +15,17 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { flushSync } from "react-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { domains } from "@/content/profile";
 import { projects, type Latency, type Project } from "@/content/work";
+import { cn } from "@/lib/utils";
 import { FigureView } from "./figures";
+import { GlowCard } from "./glow-card";
 import { ProjectVisual } from "./project-visual";
+import { Tablet } from "./tablet";
 
 const ViewerContext = createContext<(id: string) => void>(() => {});
 
@@ -31,19 +35,57 @@ export const useOpenProject = () => useContext(ViewerContext);
 const domainTitle = (id: string) =>
   domains.find((domain) => domain.id === id)?.title ?? id;
 
+/** A project's visual on its card in the work grid, if it is on screen. */
+function cardVisual(id: string | null) {
+  if (!id) return null;
+  const card = document.querySelector<HTMLElement>(
+    `[data-project-visual="${id}"]`,
+  );
+  if (!card) return null;
+  const rect = card.getBoundingClientRect();
+  return rect.bottom > 0 && rect.top < window.innerHeight ? card : null;
+}
+
+/**
+ * Opens or closes the viewer as a view transition, where the browser has
+ * them: the project's visual on its card and the visual in the viewer are
+ * treated as one element, so it grows out of the card and shrinks back into
+ * it. Elsewhere, and with reduced motion, the change is simply made.
+ */
+function transition(id: string | null, opening: boolean, change: () => void) {
+  if (
+    !document.startViewTransition ||
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  ) {
+    change();
+    return;
+  }
+  // Only one element may carry the name at a time: the card before opening
+  // and after closing, the viewer's own visual (in CSS) while it is open.
+  const card = cardVisual(id);
+  if (card && opening) card.style.viewTransitionName = "project-visual";
+  const running = document.startViewTransition(() => {
+    flushSync(change);
+    if (card) card.style.viewTransitionName = opening ? "" : "project-visual";
+  });
+  running.finished.finally(() => {
+    if (card) card.style.viewTransitionName = "";
+  });
+}
+
 export function ViewerProvider({ children }: { children: ReactNode }) {
   const [id, setId] = useState<string | null>(null);
   const opener = useRef<HTMLElement | null>(null);
 
   const open = useCallback((next: string) => {
     opener.current = document.activeElement as HTMLElement | null;
-    setId(next);
+    transition(next, true, () => setId(next));
   }, []);
 
   const close = useCallback(() => {
-    setId(null);
+    transition(id, false, () => setId(null));
     opener.current?.focus({ preventScroll: true });
-  }, []);
+  }, [id]);
 
   const step = useCallback((by: number) => {
     setId((current) => {
@@ -61,6 +103,8 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
     const main = document.getElementById("main");
     document.body.style.overflow = "hidden";
     main?.setAttribute("inert", "");
+    // Tells the particle swarm it is covered, so it stops drawing.
+    document.documentElement.dataset.viewer = "open";
 
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") close();
@@ -74,6 +118,7 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
     return () => {
       document.body.style.overflow = "";
       main?.removeAttribute("inert");
+      delete document.documentElement.dataset.viewer;
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("hashchange", onHash);
     };
@@ -112,10 +157,17 @@ function Viewer({
       role="dialog"
       aria-modal="true"
       aria-labelledby="viewer-title"
+      data-lenis-prevent
       className="viewer fixed left-0 top-0 z-40 h-full w-full bg-background"
     >
       <div className="mt-20 flex h-[calc(100dvh-5rem)] w-full flex-col">
-        <div className="mx-auto mb-2 flex w-full max-w-3xl flex-wrap items-end justify-between gap-x-4 gap-y-3 px-4 pt-3">
+        <div
+          className={cn(
+            "mx-auto mb-2 flex w-full flex-wrap items-end justify-between gap-x-4 gap-y-3 px-4 pt-3",
+            // A design study is laid out wider than a written case study.
+            project.embed ? "max-w-7xl" : "max-w-3xl",
+          )}
+        >
           <div className="min-w-0">
             <p className="text-sm text-muted-foreground">
               {String(index + 1).padStart(2, "0")} /{" "}
@@ -123,14 +175,15 @@ function Viewer({
               <span className="mx-2">·</span>
               {project.domains.map(domainTitle).join(", ")}
             </p>
-            <h4 id="viewer-title" className="text-2xl font-bold">
+            <h2 id="viewer-title" className="text-2xl font-bold">
               {project.title}
-            </h4>
+            </h2>
           </div>
           <div className="ml-auto flex shrink-0 items-center gap-2">
             <Button
               variant="outline"
               size="icon"
+              className="tap"
               aria-label="Previous project"
               onClick={() => onStep(-1)}
             >
@@ -139,35 +192,135 @@ function Viewer({
             <Button
               variant="outline"
               size="icon"
+              className="tap"
               aria-label="Next project"
               onClick={() => onStep(1)}
             >
               <ChevronRightIcon />
             </Button>
-            <Button ref={closeRef} variant="outline" onClick={onClose}>
+            <Button
+              ref={closeRef}
+              variant="outline"
+              className="tap"
+              onClick={onClose}
+            >
               Close
             </Button>
           </div>
         </div>
 
+        {/* The scrolling area can be focused, so it scrolls from the keyboard. */}
         {project.embed ? (
-          <div className="relative mt-2 flex-1">
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-              <UpdateIcon className="h-6 w-6 animate-spin" />
-              <span className="text-sm font-light text-muted-foreground">Loading</span>
-            </div>
-            <iframe
-              key={project.id}
-              title={`${project.title}, design case study`}
-              src={project.embed}
-              className="absolute inset-0 h-full w-full bg-background"
-            />
+          <div
+            key={project.id}
+            tabIndex={0}
+            role="region"
+            aria-label={`${project.title}: design study`}
+            className="flex-1 overflow-y-auto lg:overflow-hidden"
+          >
+            <Study project={project} embed={project.embed} />
           </div>
         ) : (
-          <div key={project.id} className="flex-1 overflow-y-auto">
+          <div
+            key={project.id}
+            tabIndex={0}
+            role="region"
+            aria-label={`${project.title}: case study`}
+            className="flex-1 overflow-y-auto"
+          >
             <Detail project={project} />
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * A design study: what it is on the left (the cover on a tablet, the brief,
+ * what the document shows), and the document itself to read on the right.
+ */
+function Study({ project, embed }: { project: Project; embed: string }) {
+  const study = project.study;
+  return (
+    <div className="mx-auto grid w-full max-w-7xl gap-6 px-4 pb-6 pt-2 lg:h-full lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] lg:gap-8">
+      <div className="fade-up lg:overflow-y-auto lg:pb-2 lg:pr-2">
+        <GlowCard tilt={2.5} className="p-1">
+          <div className="viewer-visual visual relative aspect-video w-full overflow-hidden rounded-lg">
+            {project.image && <Tablet image={project.image} />}
+          </div>
+        </GlowCard>
+
+        {study && (
+          <>
+            <p className="mt-6 text-2xl font-light leading-snug tracking-tight">
+              {study.tagline}
+            </p>
+            <p className="mt-3 leading-relaxed text-muted-foreground">
+              {study.brief}
+            </p>
+            <ul className="mt-5 flex flex-wrap gap-2" aria-label="Focus">
+              {study.focus.map((item) => (
+                <li key={item}>
+                  <Badge variant="outline" className="px-2.5 py-1 font-normal">
+                    {item}
+                  </Badge>
+                </li>
+              ))}
+            </ul>
+
+            {study.screens && (
+              <>
+                <h3 className="mt-8 text-sm text-muted-foreground">
+                  In the document, in order
+                </h3>
+                <ol className="mt-2 border-t">
+                  {study.screens.map((screen, i) => (
+                    <li key={screen} className="flex gap-4 border-b py-2.5">
+                      <span className="w-4 shrink-0 text-sm tabular-nums leading-6 text-muted-foreground">
+                        {i + 1}
+                      </span>
+                      <span>{screen}</span>
+                    </li>
+                  ))}
+                </ol>
+              </>
+            )}
+
+            <dl className="mt-8 grid grid-cols-2 gap-x-6 gap-y-4 border-t pt-5">
+              <div>
+                <dt className="text-sm text-muted-foreground">Kind</dt>
+                <dd className="mt-1">Product-design study</dd>
+              </div>
+              <div>
+                <dt className="text-sm text-muted-foreground">From</dt>
+                <dd className="mt-1">B.Des, UX and UI</dd>
+              </div>
+            </dl>
+
+            <Button asChild variant="outline" className="tap mt-6 gap-2">
+              <a href={study.link} target="_blank" rel="noreferrer">
+                Open the document on its own
+                <ArrowTopRightIcon />
+              </a>
+            </Button>
+          </>
+        )}
+      </div>
+
+      <div className="relative min-h-[78svh] overflow-hidden rounded-2xl border bg-card lg:min-h-0">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+          <UpdateIcon className="h-6 w-6 animate-spin" />
+          <span className="text-sm font-light text-muted-foreground">
+            Loading the document
+          </span>
+        </div>
+        <iframe
+          key={project.id}
+          title={`${project.title}, design study document`}
+          src={embed}
+          className="absolute inset-0 h-full w-full bg-background"
+        />
       </div>
     </div>
   );
@@ -178,7 +331,7 @@ function Detail({ project }: { project: Project }) {
     <article className="fade-up mx-auto w-full max-w-3xl px-4 pb-24 pt-4">
       {project.visual && (
         <Card className="rounded-2xl p-1 shadow-none">
-          <div className="relative aspect-video w-full overflow-hidden rounded-xl">
+          <div className="viewer-visual relative aspect-video w-full overflow-hidden rounded-xl">
             <ProjectVisual name={project.visual} />
           </div>
         </Card>

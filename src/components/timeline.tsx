@@ -37,7 +37,7 @@ export function Timeline() {
   const row =
     "grid items-center gap-x-6 gap-y-1 border-t py-2 md:grid-cols-[16rem_1fr]";
   const name =
-    "flex items-baseline justify-between gap-3 text-left transition-colors hover:text-foreground md:block";
+    "tap flex cursor-pointer items-center justify-between gap-3 text-left transition-colors hover:text-foreground md:block";
 
   return (
     <InView>
